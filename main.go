@@ -38,7 +38,6 @@ func runOneapi() {
 		fmt.Println("Error downloading one-api:", err)
 		return
 	}
-	defer os.Remove("one-api")
 
 	// 赋予权限
 	err = os.Chmod("one-api", 0755)
