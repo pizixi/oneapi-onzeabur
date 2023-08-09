@@ -47,7 +47,7 @@ func runOneapi() {
 	}
 
 	// 运行 one-api
-	cmd := exec.Command("./one-api --port 3000")
+	cmd := exec.Command("./one-api", "--port", "3000")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
