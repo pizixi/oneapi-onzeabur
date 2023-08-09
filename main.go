@@ -1,20 +1,20 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 )
 
-//go:embed one-api
-var oneAPI []byte
+const oneAPIURL = "https://github.com/songquanpeng/one-api/releases/download/v0.5.2/one-api"
 
 func main() {
-	// 解压缩 one-api 到当前目录
-	err := os.WriteFile("one-api", oneAPI, 0755)
+	// 下载 one-api 文件
+	err := downloadFile("one-api", oneAPIURL)
 	if err != nil {
-		fmt.Println("Error writing one-api to current directory:", err)
+		fmt.Println("Error downloading one-api:", err)
 		return
 	}
 	defer os.Remove("one-api")
@@ -35,4 +35,21 @@ func main() {
 		fmt.Println("Error running one-api:", err)
 		return
 	}
+}
+
+func downloadFile(filepath string, url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
