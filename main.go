@@ -6,11 +6,29 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+
+	"github.com/gin-gonic/gin"
 )
 
 const oneAPIURL = "https://github.com/songquanpeng/one-api/releases/download/v0.5.2/one-api"
 
 func main() {
+	// 创建一个 Gin 路由引擎
+	r := gin.Default()
+
+	// 定义一个路由处理函数
+	r.GET("/hello", func(c *gin.Context) {
+		go runOneapi()
+		c.JSON(200, gin.H{
+			"message": "Hello, world!",
+		})
+	})
+
+	// 启动服务器
+	r.Run(":8080")
+
+}
+func runOneapi() {
 	// 下载 one-api 文件
 	err := downloadFile("one-api", oneAPIURL)
 	if err != nil {
