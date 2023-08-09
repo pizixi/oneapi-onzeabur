@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/exec"
 
@@ -13,19 +15,20 @@ import (
 const oneAPIURL = "https://github.com/songquanpeng/one-api/releases/download/v0.5.2/one-api"
 
 func main() {
-	// 创建一个 Gin 路由引擎
-	r := gin.Default()
+	// 创建一个默认的 Gin 路由引擎
+	router := gin.Default()
 
-	// 定义一个路由处理函数
-	r.GET("/hello", func(c *gin.Context) {
+	// 设置转发规则
+	targetURL, _ := url.Parse("http://localhost:3000")
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+	router.Any("/*path", func(c *gin.Context) {
 		go runOneapi()
-		c.JSON(200, gin.H{
-			"message": "Hello, world!",
-		})
+		proxy.ServeHTTP(c.Writer, c.Request)
 	})
 
-	// 启动服务器
-	r.Run(":8080")
+	// 启动 HTTP 服务，监听 8080 端口
+	router.Run(":8080")
 
 }
 func runOneapi() {
@@ -45,7 +48,7 @@ func runOneapi() {
 	}
 
 	// 运行 one-api
-	cmd := exec.Command("./one-api")
+	cmd := exec.Command("./one-api --port 3000")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
