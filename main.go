@@ -15,23 +15,7 @@ import (
 const oneAPIURL = "https://github.com/songquanpeng/one-api/releases/download/v0.5.2/one-api"
 
 func main() {
-	// 创建一个默认的 Gin 路由引擎
-	router := gin.Default()
 
-	// 设置转发规则
-	targetURL, _ := url.Parse("http://localhost:3000")
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-
-	router.Any("/*path", func(c *gin.Context) {
-		go runOneapi()
-		proxy.ServeHTTP(c.Writer, c.Request)
-	})
-
-	// 启动 HTTP 服务，监听 8080 端口
-	router.Run(":8080")
-
-}
-func runOneapi() {
 	// 下载 one-api 文件
 	err := downloadFile("one-api", oneAPIURL)
 	if err != nil {
@@ -55,6 +39,23 @@ func runOneapi() {
 		fmt.Println("Error running one-api:", err)
 		return
 	}
+
+}
+
+func ginTest() {
+	// 创建一个默认的 Gin 路由引擎
+	router := gin.Default()
+
+	// 设置转发规则
+	targetURL, _ := url.Parse("http://localhost:3000")
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+	router.Any("/*path", func(c *gin.Context) {
+		proxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	// 启动 HTTP 服务，监听 8080 端口
+	router.Run(":8080")
 }
 
 func downloadFile(filepath string, url string) error {
